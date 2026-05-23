@@ -1,47 +1,45 @@
+from langchain_core.tools import tool
+
 import subprocess
 
 
+@tool
 def run_terminal_command(
     command: str,
-    cwd: str | None = None
-):
+    cwd: str
+) -> str:
+    """
+    Executes terminal commands inside a workspace.
 
-    try:
+    Use for:
+    - creating directories
+    - creating ROS2 packages
+    - touching files
+    - colcon build
+    - ROS2 setup commands
+    """
 
-        result = subprocess.run(
+    result = subprocess.run(
 
-            command,
+        command,
 
-            shell=True,
+        shell=True,
 
-            cwd=cwd,
+        cwd=cwd,
 
-            capture_output=True,
+        capture_output=True,
 
-            text=True
+        text=True
+    )
 
-        )
+    return f"""
 
-        return {
+STDOUT:
+{result.stdout}
 
-            "success":
-                result.returncode == 0,
+STDERR:
+{result.stderr}
 
-            "stdout":
-                result.stdout,
-
-            "stderr":
-                result.stderr,
-
-            "return_code":
-                result.returncode
-        }
-
-    except Exception as e:
-
-        return {
-
-            "success": False,
-
-            "stderr": str(e)
-        }
+RETURN CODE:
+{result.returncode}
+"""

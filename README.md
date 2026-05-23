@@ -51,6 +51,9 @@ python3 -m <package/directory_name>.<file_name>
 Currently No Integration with the Postgre thing WhatSoever
 
 
+## Ok change in Plans, now I am Planning to build a Reasoner Agent, which will call the Planner, Github etc...., and again it will call the loop
+
+
 
 
 

@@ -1,7 +1,7 @@
-import os
 from AgentState.AgentState import AgentState
 from langchain_core.messages import HumanMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_mistralai import ChatMistralAI
+from langchain_ollama import ChatOllama
 from dotenv import load_dotenv
 from pydantic import BaseModel # Coz LLM Returns in Markdown Format
 
@@ -13,18 +13,23 @@ class PlannerOutput(BaseModel):
 
     plan: list[str]
 
-    pending_files: list[str]
-
-    file_dependencies: dict[str, list[str]]
 
 
 load_dotenv()
 
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+llm = ChatMistralAI(
+    model="codestral-latest",
     temperature=0.2
 )
+
+'''llm = ChatOllama(
+
+    model="qwen3:8b",
+    keep_alive="5m",
+
+    temperature=0
+)'''
 
 PLANNER_PROMPT = """
 You are a ROS2 software planning agent.
@@ -44,6 +49,8 @@ Bad Example:
 - define callback
 
 Good Example:
+- Create Directory
+
 - Create ROS2 node
 - Implement LiDAR processing
 
@@ -55,19 +62,20 @@ Start by planning:
 - sourcing/setup steps
 - directory structure
 
-3. Do NOT include package.xml in pending_files.
-Assume dependencies will mostly be handled using:
-- colcon build
-- setup.py
+Then Only Go to Code Files Creation and Running Scripts, like overwrite(OR MAYBE Remove Plans which are done) the Plans if you see the workspace_summary is enough to start Coding.
 
-4. Use Python for all implementations.
 
-5. Generate only meaningful architectural files.
 
-6. Return concise and practical plans.
+3. Use Python for all implementations.
 
-7. Do NOT generate implementation/code.
+
+
+4. Return concise and practical plans.
+
+5. Do NOT generate implementation/code.
 Only planning.
+
+
 
 
 Return ONLY valid JSON.
@@ -78,17 +86,10 @@ Format:
     "plan": [
         "task1",
         "task2"
-    ],
-
-    "pending_files": [
-        "file1",
-        "file2"
-    ],
-
-    "file_dependencies": {
-        "file": ["dependency"]
-    }
+    ]
 }
+
+
 """
 
 def planner_node(state: AgentState) -> AgentState:
@@ -98,6 +99,7 @@ def planner_node(state: AgentState) -> AgentState:
 
     
     user_goal = state["user_goal"]
+    work_space_summary = state["workspace_summary"]
 
     structured_llm = llm.with_structured_output(PlannerOutput)
 
@@ -110,6 +112,9 @@ def planner_node(state: AgentState) -> AgentState:
 
                 USER GOAL:
                 {user_goal}
+
+                WORK_SPACE SUMMARY:
+                {work_space_summary}
             """
             )
         ]
@@ -119,11 +124,6 @@ def planner_node(state: AgentState) -> AgentState:
     return {
 
     "plan": parsed.plan,
-
-    "pending_files": parsed.pending_files,
-
-    "file_dependencies":
-        parsed.file_dependencies,
 
     "current_task":
         parsed.plan[0],

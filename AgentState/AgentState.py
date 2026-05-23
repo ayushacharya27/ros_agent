@@ -31,7 +31,8 @@ class AgentState(TypedDict):
     file_dependencies: dict[str, list[str]] # Taken Up By the Builder Agent
 
     # Directory/Builder Agent 
-    build_status: str
+    build_logs: list[str] # Like it'll say that what all is done or not
+     
     
     # Coder Agent
     current_file: str
@@ -44,4 +45,6 @@ class AgentState(TypedDict):
     
     current_agent: str # IDK It'll be used or not
     workspace_path: str # IMPORTANT
+
+    next_agent: str # Change in Plans, Now ill build a Reasoner agent whic diverts the flow of the Program 
     
