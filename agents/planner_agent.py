@@ -1,7 +1,7 @@
 from AgentState.AgentState import AgentState
 from langchain_core.messages import HumanMessage
-from langchain_mistralai import ChatMistralAI
 from langchain_ollama import ChatOllama
+
 from dotenv import load_dotenv
 from pydantic import BaseModel # Coz LLM Returns in Markdown Format
 
@@ -18,8 +18,8 @@ class PlannerOutput(BaseModel):
 load_dotenv()
 
 
-llm = ChatMistralAI(
-    model="codestral-latest",
+llm = ChatOllama(
+    model="qwen3:8b",
     temperature=0.2
 )
 
