@@ -2,3 +2,5 @@
 test_agent.py
 ros_env/
 database/
+AgentV2/ros_agentv2/
+AgentV2/database/
